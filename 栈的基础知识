@@ -1,0 +1,93 @@
+栈
+
+可以把它想象成一个羽毛球筒或者弹匣：最先放进去的羽毛球，必须最后才能拿出来。
+
+1. 核心概念与特性
+后进先出（LIFO）：Last In First Out。最后放进去的元素，最先被取出来。
+操作受限：只允许在一端进行插入和删除操作。这一端叫栈顶（Top），另一端叫栈底（Bottom）。
+核心操作：
+入栈（Push）：往栈顶放元素。
+出栈（Pop）：从栈顶拿走元素。
+取栈顶（Peek/Top）：看看栈顶是谁，但不拿走。
+
+
+
+C语言常用实现（动态数组版）
+因为不知道数据量有多大，通常使用动态数组来实现栈
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+typedef int STDataType; // 栈里存的数据类型，刷题时按需修改（比如 char）
+
+typedef struct Stack {
+    STDataType* arr;  // 指向动态开辟的数组
+    int top;          // 栈顶指针（通常指向栈顶元素的下一个位置，也代表当前元素个数）
+    int capacity;     // 数组容量
+} Stack;
+
+// 1. 初始化栈
+void StackInit(Stack* ps) {
+    assert(ps);
+    ps->arr = NULL;
+    ps->top = ps->capacity = 0;
+}
+
+// 2. 入栈 (Push)
+void StackPush(Stack* ps, STDataType x) {
+    assert(ps);
+    // 满了就扩容（通常是2倍扩容）
+    if (ps->top == ps->capacity) {
+        int newCapacity = ps->capacity == 0 ? 4 : ps->capacity * 2;
+        STDataType* tmp = (STDataType*)realloc(ps->arr, sizeof(STDataType) * newCapacity);
+        if (tmp == NULL) exit(-1); // 扩容失败处理
+        ps->arr = tmp;
+        ps->capacity = newCapacity;
+    }
+    ps->arr[ps->top] = x; // 放入数据
+    ps->top++;            // 栈顶指针后移
+}
+
+// 3. 出栈 (Pop)
+void StackPop(Stack* ps) {
+    assert(ps);
+    assert(ps->top > 0); // 栈不能为空才能删
+    ps->top--; // 逻辑删除，top-- 后，原来的栈顶元素就访问不到了
+}
+
+// 4. 获取栈顶元素 (Top)
+STDataType StackTop(Stack* ps) {
+    assert(ps);
+    assert(ps->top > 0);
+    return ps->arr[ps->top - 1]; // top指向的是下一个位置，所以减1才是栈顶
+}
+
+// 5. 判断栈是否为空
+int StackEmpty(Stack* ps) {
+    assert(ps);
+    return ps->top == 0; // top为0就是空
+}
+
+
+
+
+刷题避坑与实战技巧
+
+top 的两种定义：刷题时要看清题目或自己的习惯。
+top = 0：指向栈顶元素的下一个位置（最常用，top的值刚好等于元素个数）。入栈是 arr[top++] = x。
+top = -1：直接指向当前栈顶元素。入栈是 arr[++top] = x。
+经典应用场景：
+括号匹配：遇到左括号 ( 入栈，遇到右括号 ) 检查栈顶是否匹配并出栈。
+逆序输出：利用 LIFO 特性，把一串数据压入栈再弹出，顺序就反过来了。
+函数调用/递归：系统底层就是利用栈来保存函数调用的上下文。
+注意内存释放：在 C 语言中，刷题如果手动实现了栈，在函数结束前记得 free(ps->arr)，防止内存泄漏（虽然很多在线判题系统跑完单例程会自动回收，但养成好习惯很重要）。
+
+
+
+
+
+
+
+
+
